@@ -16,7 +16,7 @@ public class PlayerPhysics : MonoBehaviour {
 	private float colliderScale;
 	
 	private int collisionDivisionsX = 3;
-	private int collisionDivisionsY =10;
+	private int collisionDivisionsY =3;
 	
 	private float skin = .005f;
 	
@@ -62,18 +62,30 @@ public class PlayerPhysics : MonoBehaviour {
 			if (Physics.Raycast(ray,out hit,Mathf.Abs(deltaY) + skin,collisionMask)) {
 				// Get Distance between player and ground
 				float dst = Vector3.Distance (ray.origin, hit.point);
-				
-				// Stop player's downwards movement after coming within skin width of a collider
-				if (dst > skin) {
-					deltaY = dst * dir - skin * dir;
+
+				if(transform.tag != "Ghost" || hit.transform.tag != "GhostTerrain")
+				{
+					if(hit.transform.tag == "Lever")
+					{
+						transform.GetComponent<PlayerController>().inLever = true;
+					}
+					else
+					{
+						transform.GetComponent<PlayerController>().inLever = false;
+						// Stop player's downwards movement after coming within skin width of a collider
+						if (dst > skin) {
+							deltaY = dst * dir - skin * dir;
+						}
+						else {
+							deltaY = 0;
+						}
+						
+						grounded = true;
+						
+						break;
+					}
 				}
-				else {
-					deltaY = 0;
-				}
-				
-				grounded = true;
-				
-				break;
+
 				
 			}
 		}
@@ -92,17 +104,28 @@ public class PlayerPhysics : MonoBehaviour {
 			if (Physics.Raycast(ray,out hit,Mathf.Abs(deltaX) + skin,collisionMask)) {
 				// Get Distance between player and ground
 				float dst = Vector3.Distance (ray.origin, hit.point);
-				
 				// Stop player's downwards movement after coming within skin width of a collider
-				if (dst > skin) {
-					deltaX = dst * dir - skin * dir;
+				print (transform.tag);
+				if(transform.tag != "Ghost" || hit.transform.tag != "GhostTerrain")
+				{
+					if(hit.transform.tag == "Lever")
+					{
+						transform.GetComponent<PlayerController>().inLever = true;
+					}
+					else
+					{
+						transform.GetComponent<PlayerController>().inLever = false;
+						if (dst > skin) {
+							deltaX = dst * dir - skin * dir;
+						}
+						else {
+							deltaX = 0;
+						}
+						
+						movementStopped = true;
+						break;
+					}
 				}
-				else {
-					deltaX = 0;
-				}
-				
-				movementStopped = true;
-				break;
 				
 			}
 		}
@@ -112,9 +135,20 @@ public class PlayerPhysics : MonoBehaviour {
 			Vector3 o = new Vector3(p.x + c.x + s.x/2 * Mathf.Sign(deltaX),p.y + c.y + s.y/2 * Mathf.Sign(deltaY));
 			ray = new Ray(o,playerDir.normalized);
 			
-			if (Physics.Raycast(ray,Mathf.Sqrt(deltaX * deltaX + deltaY * deltaY),collisionMask)) {
-				grounded = true;
-				deltaY = 0;
+			if (Physics.Raycast(ray, out hit,Mathf.Sqrt(deltaX * deltaX + deltaY * deltaY),collisionMask)) {
+				if(transform.tag != "Ghost" || hit.transform.tag != "GhostTerrain")
+				{
+					if(hit.transform.tag == "Lever")
+					{
+						transform.GetComponent<PlayerController>().inLever = true;
+					}
+					else
+					{
+						transform.GetComponent<PlayerController>().inLever = false;
+						grounded = true;
+						deltaY = 0;
+					}
+				}
 			}
 		}
 		

@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour {
 	public float acceleration = 30;
 	public float jumpHeight = 12;
 	public float slideDeceleration = 10;
+	public int lastHitTriggerID;
 	
 	// System
 	private float animationSpeed;
@@ -23,6 +24,7 @@ public class PlayerController : MonoBehaviour {
 	private bool jumping;
 	public bool isGhost=false;
 	public bool isGhostMode = false;
+	public bool inLever = false;
 	private GameObject ghostInstance;
 
 	private GameCamera cam;
@@ -62,36 +64,45 @@ public class PlayerController : MonoBehaviour {
 			
 			// Jump Input
 			if (Input.GetButtonDown("Jump")) {
-				amountToMove.y = jumpHeight;
-				jumping = true;
-				//animator.SetBool("Jumping",true);
+				if(inLever)
+				{
+					print ("in Lever");
+					GameObject.Find("GameManager").GetComponent<LeverScript>().ActivateLever(1);
+				} else
+				{
+					amountToMove.y = jumpHeight;
+					jumping = true;
+					//animator.SetBool("Jumping",true);
+				}
 			}
 
-			// Ghosting Input
-			if (Input.GetButtonDown("Ghost")) {
-				if(isGhost == false)
-				{
-					ghostInstance = (Network.Instantiate(ghost,new Vector3(transform.position.x, transform.position.y, 0),
-					                                     Quaternion.identity, 0) as GameObject);
-					isGhostMode = true;
-					isGhost = true;
-					ghostInstance.GetComponent<PlayerController>().isGhost = true;
-					GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(ghostInstance.transform);
-					//cam.SetTarget(ghostInstance.transform);
-				}
-				else if(isGhostMode == false)
-				{
-					//Destroy(gameObject);
-					networkView.RPC("RemovePlayer", RPCMode.AllBuffered);
-					//isGhost = false;
-					isGhostMode = false;
-				}
-				else
-				{
-					isGhost = false;
-					isGhostMode = false;
-					GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(transform);
-				}
+
+		}
+
+		// Ghosting Input
+		if (Input.GetButtonDown("Ghost")) {
+			if(isGhost == false)
+			{
+				ghostInstance = (Network.Instantiate(ghost,new Vector3(transform.position.x, transform.position.y, 0),
+				                                     Quaternion.identity, 0) as GameObject);
+				isGhostMode = true;
+				isGhost = true;
+				ghostInstance.GetComponent<PlayerController>().isGhost = true;
+				GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(ghostInstance.transform);
+				//cam.SetTarget(ghostInstance.transform);
+			}
+			else if(isGhostMode == false)
+			{
+				//Destroy(gameObject);
+				networkView.RPC("RemovePlayer", RPCMode.AllBuffered);
+				//isGhost = false;
+				isGhostMode = false;
+			}
+			else
+			{
+				isGhost = false;
+				isGhostMode = false;
+				GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(transform);
 			}
 		}
 
@@ -119,6 +130,16 @@ public class PlayerController : MonoBehaviour {
 		
 	}
 	
+	void onTriggerEnter(Collider other) {
+		print ("HERE");
+		if (other.tag == "Lever") {
+			inLever = true;
+			lastHitTriggerID = other.GetComponent<LeverID>().getID();
+		} else
+		{
+			inLever = false;
+		}
+	}
 	// Increase n towards target by speed
 	private float IncrementTowards(float n, float target, float a) {
 		if (n == target) {
