@@ -17,10 +17,15 @@ public class PlayerController : MonoBehaviour {
 	private float currentSpeed;
 	private float targetSpeed;
 	private Vector2 amountToMove;
-	
+
+	public GameObject ghost;
 	// States
 	private bool jumping;
-	
+	public bool isGhost=false;
+	public bool isGhostMode = false;
+	private GameObject ghostInstance;
+
+	private GameCamera cam;
 	
 	// Components
 	private PlayerPhysics playerPhysics;
@@ -64,16 +69,37 @@ public class PlayerController : MonoBehaviour {
 
 			// Ghosting Input
 			if (Input.GetButtonDown("Ghost")) {
-
+				if(isGhost == false)
+				{
+					ghostInstance = (Network.Instantiate(ghost,new Vector3(transform.position.x, transform.position.y, 0),
+					                                     Quaternion.identity, 0) as GameObject);
+					isGhostMode = true;
+					isGhost = true;
+					ghostInstance.GetComponent<PlayerController>().isGhost = true;
+					GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(ghostInstance.transform);
+					//cam.SetTarget(ghostInstance.transform);
+				}
+				else if(isGhostMode == false)
+				{
+					//Destroy(gameObject);
+					networkView.RPC("RemovePlayer", RPCMode.AllBuffered);
+					//isGhost = false;
+					isGhostMode = false;
+				}
+				else
+				{
+					isGhost = false;
+					isGhostMode = false;
+					GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(transform);
+				}
 			}
 		}
-		
-		// Set animator parameters
-		animationSpeed = IncrementTowards(animationSpeed,Mathf.Abs(targetSpeed),acceleration);
-		//animator.SetFloat("Speed",animationSpeed);
-		
-		// Input
-//		if (!sliding) {
+
+		if(!isGhostMode)
+		{
+			// Set animator parameters
+			//animationSpeed = IncrementTowards(animationSpeed,Mathf.Abs(targetSpeed),acceleration);
+
 			float speed = (Input.GetButton("Run"))?runSpeed:walkSpeed;
 			targetSpeed = Input.GetAxisRaw("Horizontal") * speed;
 			currentSpeed = IncrementTowards(currentSpeed, targetSpeed,acceleration);
@@ -83,15 +109,13 @@ public class PlayerController : MonoBehaviour {
 			if (moveDir !=0) {
 				transform.eulerAngles = (moveDir>0)?Vector3.up * 180:Vector3.zero;
 			}
-//		}
-//		else {
-//			currentSpeed = IncrementTowards(currentSpeed, targetSpeed,slideDeceleration);
-//		}
-		
-		// Set amount to move
-		amountToMove.x = currentSpeed;
-		amountToMove.y -= gravity * Time.deltaTime;
-		playerPhysics.Move(amountToMove * Time.deltaTime);
+
+			
+			// Set amount to move
+			amountToMove.x = currentSpeed;
+			amountToMove.y -= gravity * Time.deltaTime;
+			playerPhysics.Move(amountToMove * Time.deltaTime);
+		}
 		
 	}
 	
@@ -105,5 +129,18 @@ public class PlayerController : MonoBehaviour {
 			n += a * Time.deltaTime * dir;
 			return (dir == Mathf.Sign(target-n))? n: target; // if n has now passed target then return target, otherwise return n
 		}
+	}
+
+	[RPC]
+	void RemovePlayer()
+	{
+		Destroy (gameObject);
+
+	}
+
+	IEnumerator DelayIsGhost(bool value)
+	{
+		yield return new WaitForSeconds(0.5f);
+		isGhost = value;
 	}
 }

@@ -13,6 +13,7 @@ public class GameCamera : MonoBehaviour {
 		{
 			target = transform.parent.transform;
 			transform.parent = null;
+			transform.tag = "myCamera";
 		}
 		else
 		{
