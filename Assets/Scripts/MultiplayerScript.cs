@@ -115,8 +115,6 @@ public class MultiplayerScript : MonoBehaviour {
 				PlayerPrefs.SetString("serverName", serverName);
 				
 				iWantToSetupAServer = false;
-
-				serverStartedAndNoPlayersConnected = true;
 			}
 			
 			if(GUILayout.Button("Go Back", GUILayout.Height(30)))

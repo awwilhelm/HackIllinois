@@ -5,8 +5,21 @@ public class GameCamera : MonoBehaviour {
 	
 	private Transform target;
 	public float trackSpeed = 25;
-	public GameObject parent;
-	
+	//public GameObject parent;
+
+	void Start()
+	{
+		if(networkView.isMine)
+		{
+			target = transform.parent.transform;
+			transform.parent = null;
+		}
+		else
+		{
+			transform.parent = null;
+			gameObject.SetActive(false);
+		}
+	}
 	
 	// Set target
 	public void SetTarget(Transform t) {

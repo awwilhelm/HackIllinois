@@ -51,7 +51,6 @@ public class PlayerPhysics : MonoBehaviour {
 		
 		// Check collisions above and below
 		grounded = false;
-		
 		for (int i = 0; i<collisionDivisionsX; i ++) {
 			float dir = Mathf.Sign(deltaY);
 			float x = (p.x + c.x - s.x/2) + s.x/(collisionDivisionsX-1) * i; // Left, centre and then rightmost point of collider
@@ -122,8 +121,8 @@ public class PlayerPhysics : MonoBehaviour {
 		
 		Vector2 finalTransform = new Vector2(deltaX,deltaY);
 		
-		transform.Translate(finalTransform,Space.World);
-		networkView.RPC ("UpdatePosition", RPCMode.AllBuffered, transform.position.x, transform.position.y);
+		//transform.Translate(finalTransform,Space.World);
+		networkView.RPC ("UpdatePosition", RPCMode.AllBuffered, deltaX, deltaY);
 	}
 	
 	// Set collider
@@ -143,7 +142,8 @@ public class PlayerPhysics : MonoBehaviour {
 	[RPC]
 	void UpdatePosition (float x, float y)
 	{
-		transform.Translate (new Vector2(x, y), Space.World);
+		transform.Translate(new Vector2(x, y),Space.World);
+		//transform.Translate (new Vector2(x, y), Space.World);
 	}
 	
 }
