@@ -67,11 +67,11 @@ public class PlayerPhysics : MonoBehaviour {
 				{
 					if(hit.transform.tag == "Lever")
 					{
-						transform.GetComponent<PlayerController>().inLever = true;
+						//transform.GetComponent<PlayerController>().inLever = true;
 					}
 					else
 					{
-						transform.GetComponent<PlayerController>().inLever = false;
+						//transform.GetComponent<PlayerController>().inLever = false;
 						// Stop player's downwards movement after coming within skin width of a collider
 						if (dst > skin) {
 							deltaY = dst * dir - skin * dir;
@@ -105,16 +105,15 @@ public class PlayerPhysics : MonoBehaviour {
 				// Get Distance between player and ground
 				float dst = Vector3.Distance (ray.origin, hit.point);
 				// Stop player's downwards movement after coming within skin width of a collider
-				print (transform.tag);
 				if(transform.tag != "Ghost" || hit.transform.tag != "GhostTerrain")
 				{
 					if(hit.transform.tag == "Lever")
 					{
-						transform.GetComponent<PlayerController>().inLever = true;
+						//transform.GetComponent<PlayerController>().inLever = true;
 					}
 					else
 					{
-						transform.GetComponent<PlayerController>().inLever = false;
+						//transform.GetComponent<PlayerController>().inLever = false;
 						if (dst > skin) {
 							deltaX = dst * dir - skin * dir;
 						}
@@ -140,11 +139,10 @@ public class PlayerPhysics : MonoBehaviour {
 				{
 					if(hit.transform.tag == "Lever")
 					{
-						transform.GetComponent<PlayerController>().inLever = true;
+						//transform.GetComponent<PlayerController>().inLever = true;
 					}
 					else
 					{
-						transform.GetComponent<PlayerController>().inLever = false;
 						grounded = true;
 						deltaY = 0;
 					}

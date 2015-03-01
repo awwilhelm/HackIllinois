@@ -9,23 +9,27 @@ public class PlayerController : MonoBehaviour {
 	public float walkSpeed = 8;
 	public float runSpeed = 12;
 	public float acceleration = 30;
-	public float jumpHeight = 12;
+	public float jumpHeight = 8;
 	public float slideDeceleration = 10;
-	public int lastHitTriggerID;
+	public Collider lastHitCollided;
 	
 	// System
 	private float animationSpeed;
 	private float currentSpeed;
 	private float targetSpeed;
 	private Vector2 amountToMove;
+	public GameObject lever1;
 
 	public GameObject ghost;
 	// States
 	private bool jumping;
 	public bool isGhost=false;
 	public bool isGhostMode = false;
-	public bool inLever = false;
+	public bool inLever1 = false;
+	public bool inLever2 = false;
+
 	private GameObject ghostInstance;
+	public int playerID;
 
 	private GameCamera cam;
 	
@@ -37,6 +41,7 @@ public class PlayerController : MonoBehaviour {
 	void Start () {
 		if (networkView.isMine) {
 				playerPhysics = GetComponent<PlayerPhysics> ();
+			lever1 = GameObject.Find("Lever1");
 		} else {
 			enabled = false;
 		}
@@ -64,15 +69,31 @@ public class PlayerController : MonoBehaviour {
 			
 			// Jump Input
 			if (Input.GetButtonDown("Jump")) {
-				if(inLever)
-				{
-					print ("in Lever");
-					GameObject.Find("GameManager").GetComponent<LeverScript>().ActivateLever(1);
-				} else
-				{
-					amountToMove.y = jumpHeight;
-					jumping = true;
+				amountToMove.y = jumpHeight;
+				jumping = true;
 					//animator.SetBool("Jumping",true);
+			}
+			// Active Input
+			if (Input.GetButtonDown("Active")) {
+				print ((GameObject.Find("GameManager").GetComponent<GameManager>().lever2PlayerPulled != playerID)+" "+inLever1);
+
+				if(lastHitCollided!=null && inLever1 && 
+				   GameObject.Find("GameManager").GetComponent<GameManager>().lever2PlayerPulled != playerID)
+				{
+					GameObject.Find("firstLever").GetComponent<LeverScript>().setLever1(true);
+					Vector3 temp = lastHitCollided.transform.Find("Pull").transform.rotation.eulerAngles;
+					temp.z = 325.0f;
+					lastHitCollided.transform.Find("Pull").transform.rotation = Quaternion.Euler(temp);
+					GameObject.Find("GameManager").GetComponent<GameManager>().lever1PlayerPulled = playerID;
+				}
+				if(lastHitCollided!=null && inLever2 &&
+				   GameObject.Find("GameManager").GetComponent<GameManager>().lever1PlayerPulled != playerID)
+				{
+					GameObject.Find("firstLever").GetComponent<LeverScript>().setLever2(true);
+					Vector3 temp = lastHitCollided.transform.Find("Pull").transform.rotation.eulerAngles;
+					temp.z = 325.0f;
+					lastHitCollided.transform.Find("Pull").transform.rotation = Quaternion.Euler(temp);
+					GameObject.Find("GameManager").GetComponent<GameManager>().lever1PlayerPulled = playerID;
 				}
 			}
 
@@ -89,6 +110,7 @@ public class PlayerController : MonoBehaviour {
 				isGhost = true;
 				ghostInstance.GetComponent<PlayerController>().isGhost = true;
 				GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(ghostInstance.transform);
+				ghostInstance.GetComponent<PlayerController>().playerID = playerID;
 				//cam.SetTarget(ghostInstance.transform);
 			}
 			else if(isGhostMode == false)
@@ -111,7 +133,7 @@ public class PlayerController : MonoBehaviour {
 			// Set animator parameters
 			//animationSpeed = IncrementTowards(animationSpeed,Mathf.Abs(targetSpeed),acceleration);
 
-			float speed = (Input.GetButton("Run"))?runSpeed:walkSpeed;
+			float speed = walkSpeed;  // (Input.GetButton("Run"))?runSpeed:walkSpeed;
 			targetSpeed = Input.GetAxisRaw("Horizontal") * speed;
 			currentSpeed = IncrementTowards(currentSpeed, targetSpeed,acceleration);
 			
@@ -126,22 +148,34 @@ public class PlayerController : MonoBehaviour {
 			amountToMove.x = currentSpeed;
 			amountToMove.y -= gravity * Time.deltaTime;
 			playerPhysics.Move(amountToMove * Time.deltaTime);
+			if(transform.position.y < -10)
+			{
+				transform.position = GameObject.Find("SpawnPoint").transform.position;
+			}
 		}
 		
 	}
 	
-	void onTriggerEnter(Collider other) {
-		print ("HERE");
-		if (other.tag == "Lever") {
-			inLever = true;
-			lastHitTriggerID = other.GetComponent<LeverID>().getID();
-		} else
-		{
-			inLever = false;
+	void OnTriggerEnter(Collider other) {
+		if (other.tag == "Lever" && other.name == "Lever1") {
+			inLever1 = true;
+			lastHitCollided = other;
+			//lastHitTriggerID = other.GetComponent<LeverID>().getID();
+		}
+		else{
+			inLever1 = false;
+		}
+		if (other.tag == "Lever" && other.name == "Lever2") {
+			inLever2 = true;
+			lastHitCollided = other;
+			//lastHitTriggerID = other.GetComponent<LeverID>().getID();
+		}
+		else{
+			inLever2 = false;
 		}
 	}
 	// Increase n towards target by speed
-	private float IncrementTowards(float n, float target, float a) {
+	public float IncrementTowards(float n, float target, float a) {
 		if (n == target) {
 			return n;	
 		}
