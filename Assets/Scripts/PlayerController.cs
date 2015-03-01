@@ -18,7 +18,6 @@ public class PlayerController : MonoBehaviour {
 	private float currentSpeed;
 	private float targetSpeed;
 	private Vector2 amountToMove;
-	public GameObject lever1;
 
 	public GameObject ghost;
 	// States
@@ -40,8 +39,7 @@ public class PlayerController : MonoBehaviour {
 	
 	void Start () {
 		if (networkView.isMine) {
-				playerPhysics = GetComponent<PlayerPhysics> ();
-			lever1 = GameObject.Find("Lever1");
+			playerPhysics = GetComponent<PlayerPhysics> ();
 		} else {
 			enabled = false;
 		}
@@ -75,25 +73,28 @@ public class PlayerController : MonoBehaviour {
 			}
 			// Active Input
 			if (Input.GetButtonDown("Active")) {
-				print ((GameObject.Find("GameManager").GetComponent<GameManager>().lever2PlayerPulled != playerID)+" "+inLever1);
+				//print ((GameObject.Find("GameManager").GetComponent<GameManager>().lever2PlayerPulled != playerID)+" "+inLever1);
 
-				if(lastHitCollided!=null && inLever1 && 
-				   GameObject.Find("GameManager").GetComponent<GameManager>().lever2PlayerPulled != playerID)
+				if(lastHitCollided!=null && inLever1)// && 
+				   //GameObject.Find("GameManager").GetComponent<GameManager>().getLever2PlayerPulled() != playerID)
 				{
 					GameObject.Find("firstLever").GetComponent<LeverScript>().setLever1(true);
+					GameObject.Find("GameManager").GetComponent<GameManager>().setLever1PlayerPulled(playerID);
+
 					Vector3 temp = lastHitCollided.transform.Find("Pull").transform.rotation.eulerAngles;
 					temp.z = 325.0f;
-					lastHitCollided.transform.Find("Pull").transform.rotation = Quaternion.Euler(temp);
-					GameObject.Find("GameManager").GetComponent<GameManager>().lever1PlayerPulled = playerID;
+					networkView.RPC("rpcUpdateLeverPull", RPCMode.AllBuffered, temp);
 				}
-				if(lastHitCollided!=null && inLever2 &&
-				   GameObject.Find("GameManager").GetComponent<GameManager>().lever1PlayerPulled != playerID)
+
+				if(lastHitCollided!=null && inLever2)// &&
+				   //GameObject.Find("GameManager").GetComponent<GameManager>().getLever1PlayerPulled() != playerID)
 				{
 					GameObject.Find("firstLever").GetComponent<LeverScript>().setLever2(true);
+					GameObject.Find("GameManager").GetComponent<GameManager>().setLever2PlayerPulled(playerID);
+
 					Vector3 temp = lastHitCollided.transform.Find("Pull").transform.rotation.eulerAngles;
 					temp.z = 325.0f;
-					lastHitCollided.transform.Find("Pull").transform.rotation = Quaternion.Euler(temp);
-					GameObject.Find("GameManager").GetComponent<GameManager>().lever1PlayerPulled = playerID;
+					networkView.RPC("rpcUpdateLeverPull", RPCMode.AllBuffered, temp);
 				}
 			}
 
@@ -111,6 +112,7 @@ public class PlayerController : MonoBehaviour {
 				ghostInstance.GetComponent<PlayerController>().isGhost = true;
 				GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(ghostInstance.transform);
 				ghostInstance.GetComponent<PlayerController>().playerID = playerID;
+				print (ghostInstance.GetComponent<PlayerController>().playerID);
 				//cam.SetTarget(ghostInstance.transform);
 			}
 			else if(isGhostMode == false)
@@ -191,6 +193,12 @@ public class PlayerController : MonoBehaviour {
 	{
 		Destroy (gameObject);
 
+	}
+
+	[RPC]
+	void rpcUpdateLeverPull(Vector3 t)
+	{
+		lastHitCollided.transform.Find("Pull").transform.rotation = Quaternion.Euler(t);
 	}
 
 	IEnumerator DelayIsGhost(bool value)

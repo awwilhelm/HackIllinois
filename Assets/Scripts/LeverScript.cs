@@ -5,7 +5,6 @@ public class LeverScript : MonoBehaviour {
 
 	public GameObject stairsMove1;
 	public bool moveStairs1=false;
-	public GameObject otherLever;
 
 	private bool lever1=false;
 	private bool lever2=false;
@@ -28,12 +27,12 @@ public class LeverScript : MonoBehaviour {
 
 	public void setLever1(bool l1)
 	{
-		lever1 = l1;
+		networkView.RPC ("rpcLever1", RPCMode.AllBuffered, l1);
 	}
 	
 	public void setLever2(bool l2)
 	{
-		lever2 = l2;
+		networkView.RPC ("rpcLever2", RPCMode.AllBuffered, l2);
 	}
 
 	private void replayVid()
@@ -42,4 +41,19 @@ public class LeverScript : MonoBehaviour {
 		stairsMove1.animation ["stairsMove1"].time = stairsMove1.animation ["stairsMove1"].length;
 		stairsMove1.animation.Play("stairsMove1");
 	}
+
+	[RPC]
+	void rpcLever1(bool l1)
+	{
+		lever1 = l1;
+	}
+
+	[RPC]
+	void rpcLever2(bool l2)
+	{
+		lever2 = l2;
+	}
+
+
+
 }
