@@ -25,23 +25,20 @@ public class GameManager : MonoBehaviour {
 	}
 	// Spawn player
 	public void SpawnPlayer() {
-		print (count);
-		if(Network.connections.Length==1)
-		{
-			GameObject.Find ("Camera").SetActive (false);
+		GameObject.Find ("Camera").SetActive (false);
 
-			Transform playerTrans = ((Network.Instantiate(player,GameObject.Find("SpawnPoint").transform.position,Quaternion.identity, 0) as GameObject).transform);
-			playerTrans.transform.tag = "Player";
-			playerTrans.GetComponent<PlayerController> ().playerID = 1;
-		} else if( Network.connections.Length==2)
-		{
-			GameObject.Find ("Camera").SetActive (false);
-			
-			Transform playerTrans = ((Network.Instantiate(player2,GameObject.Find("SpawnPoint").transform.position,Quaternion.identity, 0) as GameObject).transform);
-			playerTrans.transform.tag = "Player";
-			playerTrans.GetComponent<PlayerController> ().playerID = 2;
-		}
-		networkView.RPC ("addToCount", RPCMode.AllBuffered);
+		Transform playerTrans = ((Network.Instantiate(player,GameObject.Find("SpawnPoint").transform.position,Quaternion.identity, 0) as GameObject).transform);
+		playerTrans.transform.tag = "Player";
+		playerTrans.GetComponent<PlayerController> ().playerID = 1;
+//		else if( Network.connections.Length==2)
+//		{
+//			GameObject.Find ("Camera").SetActive (false);
+//			
+//			Transform playerTrans = ((Network.Instantiate(player2,GameObject.Find("SpawnPoint").transform.position,Quaternion.identity, 0) as GameObject).transform);
+//			playerTrans.transform.tag = "Player";
+//			playerTrans.GetComponent<PlayerController> ().playerID = 2;
+//		}
+//		networkView.RPC ("addToCount", RPCMode.AllBuffered);
 		//cam = playerTrans.transform.FindChild ("CameraHead").GetComponent<GameCamera> ();
 //		if(networkView.isMine)
 //		{

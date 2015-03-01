@@ -5,6 +5,7 @@ public class GameCamera : MonoBehaviour {
 	
 	private Transform target;
 	public float trackSpeed = 25;
+	public bool zoom = true;
 	//public GameObject parent;
 
 	void Start()
@@ -13,7 +14,7 @@ public class GameCamera : MonoBehaviour {
 		{
 			target = transform.parent.transform;
 			transform.parent = null;
-			transform.tag = "myCamera";
+			transform.tag = "MainCamera";
 		}
 		else
 		{
@@ -21,6 +22,19 @@ public class GameCamera : MonoBehaviour {
 			gameObject.SetActive(false);
 		}
 	}
+	void Update()
+	{
+//		if(zoom == true)
+//		{
+//			gameObject.GetComponent<Camera>().orthographicSize = 30;  //17
+//		}
+//		else
+//		{
+//			gameObject.GetComponent<Camera>().orthographicSize = 10;
+//		}
+	}
+
+
 	
 	// Set target
 	public void SetTarget(Transform t) {

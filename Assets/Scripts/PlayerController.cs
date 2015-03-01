@@ -110,7 +110,7 @@ public class PlayerController : MonoBehaviour {
 				isGhostMode = true;
 				isGhost = true;
 				ghostInstance.GetComponent<PlayerController>().isGhost = true;
-				GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(ghostInstance.transform);
+				GameObject.FindGameObjectWithTag("MainCamera").GetComponent<GameCamera>().SetTarget(ghostInstance.transform);
 				ghostInstance.GetComponent<PlayerController>().playerID = playerID;
 				print (ghostInstance.GetComponent<PlayerController>().playerID);
 				//cam.SetTarget(ghostInstance.transform);
@@ -126,7 +126,7 @@ public class PlayerController : MonoBehaviour {
 			{
 				isGhost = false;
 				isGhostMode = false;
-				GameObject.FindGameObjectWithTag("myCamera").GetComponent<GameCamera>().SetTarget(transform);
+				GameObject.FindGameObjectWithTag("MainCamera").GetComponent<GameCamera>().SetTarget(transform);
 			}
 		}
 
@@ -152,7 +152,8 @@ public class PlayerController : MonoBehaviour {
 			playerPhysics.Move(amountToMove * Time.deltaTime);
 			if(transform.position.y < -10)
 			{
-				transform.position = GameObject.Find("SpawnPoint").transform.position;
+				//transform.position = GameObject.Find("SpawnPoint").transform.position;
+				networkView.RPC("rpcUpdatePosition", RPCMode.AllBuffered, GameObject.Find("SpawnPoint").transform.position);
 			}
 		}
 		
@@ -199,6 +200,12 @@ public class PlayerController : MonoBehaviour {
 	void rpcUpdateLeverPull(Vector3 t)
 	{
 		lastHitCollided.transform.Find("Pull").transform.rotation = Quaternion.Euler(t);
+	}
+
+	[RPC]
+	void rpcUpdatePosition(Vector3 pos)
+	{
+		transform.position = pos;
 	}
 
 	IEnumerator DelayIsGhost(bool value)

@@ -12,16 +12,22 @@ public class ControlDoor3 : MonoBehaviour {
 	
 	void OnTriggerEnter(Collider other)
 	{
-		door2.animation["door2"].speed = 1;
-		door2.animation ["door2"].time = 0;
-		door2.animation.Play("door2");
+		if(other.tag != "cameraZoom")
+		{
+			door2.animation["door2"].speed = 1;
+			door2.animation ["door2"].time = 0;
+			door2.animation.Play("door2");
+		}
 	}
 	
 	void OnTriggerExit(Collider other)
 	{
-		door2.animation["door2"].speed = -1;
-		door2.animation ["door2"].time = door2.animation ["door2"].length;
-		door2.animation.Play("door2");
+		if(other.tag != "cameraZoom")
+		{
+			door2.animation["door2"].speed = -1;
+			door2.animation ["door2"].time = door2.animation ["door2"].length;
+			door2.animation.Play("door2");
+		}
 	}
 
 
